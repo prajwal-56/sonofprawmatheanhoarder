@@ -13,6 +13,8 @@ This script :
 """
 
 poll_time = 5
+
+
 def scan_folders(watch_folders: list):
     found = set()
     for folder in watch_folders:
@@ -20,15 +22,6 @@ def scan_folders(watch_folders: list):
             found.add( os.path.join(folder , filename) )
 
     return found
-
-
-with open("config.json" , "r") as config_json:
-    content = json.load(config_json)
-
-    watch_folders = content['watch_folders']
-    
-
-known_files = scan_folders(watch_folders)
 
 def add_to_queue(filename):
     with open("queue.json" , "r+") as queue_json:
@@ -39,15 +32,24 @@ def add_to_queue(filename):
         json.dump(queue_json_dict , queue_json , indent=2)
         queue_json.truncate()
 
-while True:
-    time.sleep(poll_time)
-    # files that are currently in each folder
-    currentfiles = scan_folders(watch_folders)
 
-    new_files = currentfiles - known_files      # finds the new files that appeared
+# handles the flow - argument passed - the config file
+def watcher_handler(config):
+    
+    watch_folders = config["watch_folders"]
+    
+    known_files = scan_folders(watch_folders)
 
-    if( new_files):
-        for file in new_files:
-            add_to_queue(file)
 
-    known_files = currentfiles # updates known files, since it's queued
+    while True:
+        time.sleep(poll_time)
+        # files that are currently in each folder
+        currentfiles = scan_folders(watch_folders)
+
+        new_files = currentfiles - known_files      # finds the new files that appeared
+
+        if( new_files):
+            for file in new_files:
+                add_to_queue(file)
+
+        known_files = currentfiles # updates known files, since it's queued
