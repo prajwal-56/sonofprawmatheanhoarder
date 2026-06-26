@@ -19,4 +19,18 @@ def get_ssid():
     else:
         return None
 
-get_ssid()  
+def is_ssid_on_allow_list( ssid: str):
+
+    try:
+        with open("config.json" , "r") as config_file:
+            content = json.load(config_file)
+
+            allow_list = content.get("allowed_networks" , [])
+
+            if ssid in allow_list:
+                return True
+            else:
+                return False
+    except FileNotFoundError:
+        print("config.json file not found")
+        return False
