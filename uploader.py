@@ -47,6 +47,7 @@ def queue_handler():
             if not os.path.exists(file):
                 print(f"File doesn't exist no more. Removing  from queue... : {file}")
                 queued_files.remove(file)
+                continue
 
                 
             response = upload_file(file)
