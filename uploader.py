@@ -1,7 +1,9 @@
+import os
+import time
 import requests
 import json
-from watcher import *
-from network import * 
+from watcher import queue_lock, poll_time
+from network import is_on_allowed_network
 from dotenv import load_dotenv
 
 """
@@ -15,59 +17,85 @@ token = os.getenv("BOT_TOKEN")
 chat_id = os.getenv("CHAT_ID")
 
 
-def upload_file(file ):
-
+def upload_file(file):
     # choose the endpoint
-    if str(file).endswith( (".png" , ".jpeg", ".jpg", ".webp" )):
-        with open(file , "rb") as img:
-                response = requests.post(
-                                f"https://api.telegram.org/bot{token}/sendPhoto",
-                            data={"chat_id": chat_id},
-                            files={"photo": img}
-                )
-                return response
-    elif str(file).endswith( ( ".mp4", ".mkv" )):
-        with open(file , "rb") as vdo:
-                response = requests.post(
-                                f"https://api.telegram.org/bot{token}/sendVideo",
-                            data={"chat_id": chat_id},
-                            files={"video": vdo}
-                )
-                return response
+    ext = str(file).lower()
+    if ext.endswith((".png", ".jpeg", ".jpg", ".webp")):
+        with open(file, "rb") as img:
+            response = requests.post(
+                f"https://api.telegram.org/bot{token}/sendPhoto",
+                data={"chat_id": chat_id},
+                files={"photo": img}
+            )
+            return response
+    elif ext.endswith((".mp4", ".mkv", ".mov")):
+        with open(file, "rb") as vdo:
+            response = requests.post(
+                f"https://api.telegram.org/bot{token}/sendVideo",
+                data={"chat_id": chat_id},
+                files={"video": vdo}
+            )
+            return response
     else:
-        pass
+        return None
 
 
 # reades the queue.json - calls upload_file for every file that's queued and removes if that's uploaded successfully
 def queue_handler():
+    with queue_lock:
+        try:
+            with open("queue.json", "r") as queue_json:
+                queued_files = json.load(queue_json).get("queued_files", [])
+        except (FileNotFoundError, json.JSONDecodeError):
+            print("queue.json is empty or doesn't exist. Nothing to upload")
+            return
 
-    try:
-        with open("queue.json" , "r") as queue_json:
-            queued_files = json.load(queue_json)["queued_files"]
-    except (FileNotFoundError , json.JSONDecodeError):
-        print(f"queue.json is empty or doesn't exist. Nothing to upload ")
-        return 
+    if not queued_files:
+        return
 
-    for file in queued_files.copy():
+    to_remove = []
 
+    for file in queued_files:
         if not os.path.exists(file):
-            print(f"File doesn't exist no more. Removing  from queue... : {file}")
-            queued_files.remove(file)
+            print(f"File doesn't exist no more. Removing from queue... : {file}")
+            to_remove.append(file)
             continue
 
-            
-        response = upload_file(file)
+        try:
+            response = upload_file(file)
+            if response is None:
+                print(f"Skipping unsupported file format: {file}")
+                to_remove.append(file)
+                continue
 
-        if response.status_code == 200:
-            print(f"yay ! {file} uploaded!")
-            queued_files.remove(file)
-        else:
-            print(f"{file} wasn't uploaded")
-            print(f"STATUS CODE : {response.status_code}")
-            print(f"RESPONSE : {response.text}")
+            if response.status_code == 200:
+                print(f"yay ! {file} uploaded!")
+                to_remove.append(file)
+            else:
+                print(f"{file} wasn't uploaded")
+                print(f"STATUS CODE : {response.status_code}")
+                print(f"RESPONSE : {response.text}")
+        except Exception as e:
+            print(f"Error uploading {file}: {e}")
 
-    with open("queue.json" , "w") as queue_json:
-        json.dump({"queued_files" : queued_files} , queue_json , indent=2)
+    if to_remove:
+        with queue_lock:
+            try:
+                with open("queue.json", "r") as queue_json:
+                    current_queue_dict = json.load(queue_json)
+            except (FileNotFoundError, json.JSONDecodeError):
+                current_queue_dict = {"queued_files": []}
+
+            if "queued_files" not in current_queue_dict:
+                current_queue_dict["queued_files"] = []
+
+            for file in to_remove:
+                if file in current_queue_dict["queued_files"]:
+                    current_queue_dict["queued_files"].remove(file)
+
+            print(f"Writing queue : {current_queue_dict['queued_files']}")
+            with open("queue.json", "w") as queue_json:
+                json.dump(current_queue_dict, queue_json, indent=2)
 
 
 # handles the flow - argument - the config file
@@ -76,8 +104,8 @@ def uploader_handler(config):
     print("uploader initialized..")
 
     while True:
-          time.sleep(poll_time)
-          if is_on_allowed_network(config):
-               queue_handler()
-          else: 
-               print("Not on allowed List. Skipping...")
+        time.sleep(poll_time)
+        if is_on_allowed_network(config):
+            queue_handler()
+        else: 
+            print("Not on allowed List. Skipping...")

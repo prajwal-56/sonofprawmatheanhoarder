@@ -13,7 +13,7 @@ t1 = threading.Thread(target=watcher.watcher_handler, args=(config,))
 t2 = threading.Thread(target=uploader.uploader_handler, args=(config,))
 
 print("Threads initilized. \nThe Bot is UP bot 🤖\n")
-print(f"👀watching : {config["watch_folders"]}")
+print(f"👀watching : {config['watch_folders']}")
 t1.start()
 t2.start()
 t1.join()
