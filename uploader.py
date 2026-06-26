@@ -2,11 +2,17 @@ import requests
 import json
 from watcher import *
 from network import * 
+from dotenv import load_dotenv
 
 """
 This script sends the post request that contains each file 
 after reading from the queue.json
 """
+
+load_dotenv()
+
+token = os.getenv("BOT_TOKEN")
+chat_id = os.getenv("CHAT_ID")
 
 def upload_file(file ):
 

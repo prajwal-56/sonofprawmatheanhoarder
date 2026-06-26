@@ -1,6 +1,11 @@
 import subprocess
 import json
 
+"""
+this script :
+- checks if the network's ssid is in the allow list 
+"""
+
 def get_ssid():
     
     print(f"Trying to get the ssid..." , end="\r")
@@ -19,18 +24,10 @@ def get_ssid():
     else:
         return None
 
-def is_ssid_on_allow_list( ssid: str):
+#  get the ssid - check if it's allowed or not
+def is_on_allowed_network( config):
+    ssid = get_ssid()
 
-    try:
-        with open("config.json" , "r") as config_file:
-            content = json.load(config_file)
-
-            allow_list = content.get("allowed_networks" , [])
-
-            if ssid in allow_list:
-                return True
-            else:
-                return False
-    except FileNotFoundError:
-        print("config.json file not found")
+    if ssid is None:
         return False
+    return ssid in config.get("allowed_networks" , [])
