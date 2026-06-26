@@ -14,10 +14,11 @@ load_dotenv()
 token = os.getenv("BOT_TOKEN")
 chat_id = os.getenv("CHAT_ID")
 
+
 def upload_file(file ):
 
     # choose the endpoint
-    if str(file).endswith( (".png" , "jpeg", ".jpg", ".webp" )):
+    if str(file).endswith( (".png" , ".jpeg", ".jpg", ".webp" )):
         with open(file , "rb") as img:
                 response = requests.post(
                                 f"https://api.telegram.org/bot{token}/sendPhoto",
@@ -62,6 +63,8 @@ def queue_handler():
             queued_files.remove(file)
         else:
             print(f"{file} wasn't uploaded")
+            print(f"STATUS CODE : {response.status_code}")
+            print(f"RESPONSE : {response.text}")
 
     with open("queue.json" , "w") as queue_json:
         json.dump({"queued_files" : queued_files} , queue_json , indent=2)
@@ -70,8 +73,9 @@ def queue_handler():
 # handles the flow - argument - the config file
 def uploader_handler(config):
      
-     print("uploader initialized..")
-     while True:
+    print("uploader initialized..")
+
+    while True:
           time.sleep(poll_time)
           if is_on_allowed_network(config):
                queue_handler()
