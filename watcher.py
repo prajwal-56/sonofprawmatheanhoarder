@@ -33,8 +33,8 @@ def add_to_queue(filename):
         print(f"The queue.json file likely don't exist :(")
         queue_json_dict = {"queued_files": []}
 
-
-    queue_json_dict["queued_files"].append(os.path.realpath(filename))
+    if os.path.realpath(filename) not in queue_json_dict["queued_files"]: 
+        queue_json_dict["queued_files"].append(os.path.realpath(filename))
 
     with open("queue.json" , "w") as queue_json:
         json.dump(queue_json_dict , queue_json , indent=2)
