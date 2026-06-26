@@ -63,9 +63,8 @@ def queue_handler():
         else:
             print(f"{file} wasn't uploaded")
 
-    queue_json.seek(0)
-    json.dump({"queued_files" : queued_files} , queue_json , indent=2)
-    queue_json.truncate()
+    with open("queue.json" , "w") as queue_json:
+        json.dump({"queued_files" : queued_files} , queue_json , indent=2)
 
 
 # handles the flow - argument - the config file
