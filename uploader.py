@@ -39,28 +39,33 @@ def upload_file(file ):
 
 # reades the queue.json - calls upload_file for every file that's queued and removes if that's uploaded successfully
 def queue_handler():
-     with open("queue.json" , "r+") as queue_json:
-        queued_files = json.load(queue_json)["queued_files"]
 
-        for file in queued_files.copy():
+    try:
+        with open("queue.json" , "r") as queue_json:
+            queued_files = json.load(queue_json)["queued_files"]
+    except (FileNotFoundError , json.JSONDecodeError):
+        print(f"queue.json is empty or doesn't exist. Nothing to upload ")
+        return 
 
-            if not os.path.exists(file):
-                print(f"File doesn't exist no more. Removing  from queue... : {file}")
-                queued_files.remove(file)
-                continue
+    for file in queued_files.copy():
 
-                
-            response = upload_file(file)
+        if not os.path.exists(file):
+            print(f"File doesn't exist no more. Removing  from queue... : {file}")
+            queued_files.remove(file)
+            continue
 
-            if response.status_code == 200:
-                print(f"yay ! {file} uploaded!")
-                queued_files.remove(file)
-            else:
-                 print(f"{file} wasn't uploaded")
+            
+        response = upload_file(file)
 
-        queue_json.seek(0)
-        json.dump({"queued_files" : queued_files} , queue_json , indent=2)
-        queue_json.truncate()
+        if response.status_code == 200:
+            print(f"yay ! {file} uploaded!")
+            queued_files.remove(file)
+        else:
+            print(f"{file} wasn't uploaded")
+
+    queue_json.seek(0)
+    json.dump({"queued_files" : queued_files} , queue_json , indent=2)
+    queue_json.truncate()
 
 
 # handles the flow - argument - the config file
