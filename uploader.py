@@ -1,6 +1,7 @@
 import requests
 import json
-
+from watcher import *
+from network import * 
 
 """
 This script sends the post request that contains each file 
@@ -29,6 +30,8 @@ def upload_file(file ):
     else:
         pass
 
+
+# reades the queue.json - calls upload_file for every file that's queued and removes if that's uploaded successfully
 def queue_handler():
      with open("queue.json" , "r+") as queue_json:
         queued_files = json.load(queue_json)["queued_files"]
@@ -45,3 +48,13 @@ def queue_handler():
         queue_json.seek(0)
         json.dump({"queued_files" : queued_files} , queue_json , indent=2)
         queue_json.truncate()
+
+
+# handles the flow - argument - the config file
+def uploader_handler(config):
+     while True:
+          time.sleep(poll_time)
+          if is_on_allowed_network(config):
+               queue_handler()
+          else: 
+               print("Not on allowed List. Skipping...")
