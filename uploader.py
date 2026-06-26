@@ -58,6 +58,8 @@ def queue_handler():
 
 # handles the flow - argument - the config file
 def uploader_handler(config):
+     
+     print("uploader initialized..")
      while True:
           time.sleep(poll_time)
           if is_on_allowed_network(config):

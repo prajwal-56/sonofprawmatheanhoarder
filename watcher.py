@@ -24,18 +24,23 @@ def scan_folders(watch_folders: list):
     return found
 
 def add_to_queue(filename):
-    with open("queue.json" , "r+") as queue_json:
-        queue_json_dict = json.load(queue_json)
-        
-        queue_json_dict["queued_files"].append(os.path.realpath(filename))
-        queue_json.seek(0) 
+    try:
+        with open("queue.json" , "r") as queue_json:
+            queue_json_dict = json.load(queue_json)
+    except (FileNotFoundError , json.JSONDecodeError):
+        print(f"The queue.json file likely don't exist :(")
+        queue_json_dict = {"queued_files": []}
+
+
+    queue_json_dict["queued_files"].append(os.path.realpath(filename))
+
+    with open("queue.json" , "w") as queue_json:
         json.dump(queue_json_dict , queue_json , indent=2)
-        queue_json.truncate()
 
 
 # handles the flow - argument passed - the config file
 def watcher_handler(config):
-    
+    print(f"The watcher is watching...")
     watch_folders = config["watch_folders"]
     
     known_files = scan_folders(watch_folders)
