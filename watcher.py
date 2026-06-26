@@ -19,6 +19,8 @@ def scan_folders(watch_folders: list):
     found = set()
     for folder in watch_folders:
         for filename in os.listdir(folder):
+            if filename.startswith("."):    # Skips dot files
+                continue
             found.add( os.path.join(folder , filename) )
 
     return found

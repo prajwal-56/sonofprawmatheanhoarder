@@ -43,6 +43,12 @@ def queue_handler():
         queued_files = json.load(queue_json)["queued_files"]
 
         for file in queued_files.copy():
+
+            if not os.path.exists(file):
+                print(f"File doesn't exist no more. Removing  from queue... : {file}")
+                queued_files.remove(file)
+
+                
             response = upload_file(file)
 
             if response.status_code == 200:
