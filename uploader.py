@@ -86,12 +86,13 @@ def queue_handler():
             if response is None:
                 print(f"Skipping unsupported file format: {file}")
                 to_remove.append(file)
-                log_uploaded_files(file)
                 continue
 
             if response.status_code == 200:
                 print(f"yay ! {file} uploaded!")
+                log_uploaded_files(file)
                 to_remove.append(file)
+
             else:
                 print(f"{file} wasn't uploaded")
                 print(f"STATUS CODE : {response.status_code}")

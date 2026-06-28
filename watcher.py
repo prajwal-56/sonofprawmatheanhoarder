@@ -2,7 +2,7 @@ import os
 import time
 import json
 import threading
-
+from uploader import uploaded_json
 # inotify = inotify_simple.INotify()
 
 
@@ -73,10 +73,18 @@ def watcher_handler(config):
         # files that are currently in each folder
         currentfiles = scan_folders(watch_folders, valid_extensions)
 
+        with open( "uploaded_files.json" , "r") as uploaded:
+            uploaded_dict = json.load(uploaded)
+
+            for file_name in uploaded_dict["uploaded_files"]:
+                known_files.add(file_name)
+
         new_files = currentfiles - known_files      # finds the new files that appeared
 
         if( new_files):
             for file in new_files:
                 add_to_queue(file)
+
+
 
         known_files = currentfiles # updates known files, since it's queued
