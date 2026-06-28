@@ -73,8 +73,11 @@ def queue_handler():
 
     to_remove = []
 
-    with open( "uploaded_files.json" , "r") as f:
-        already_uploaded = json.load(f).get("uploaded_files" , {})
+    try:
+        with open( "uploaded_files.json" , "r") as f:
+            already_uploaded = json.load(f).get("uploaded_files" , {})
+    except (FileNotFoundError , json.JSONDecodeError):
+        already_uploaded = []
 
     for file in queued_files:
         if not os.path.exists(file):
