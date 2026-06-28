@@ -41,7 +41,7 @@ def upload_file(file):
         return None
 
 
-def     (file):
+def log_uploaded_files(file):
     
     try:
         if os.path.exists(uploaded_json):
