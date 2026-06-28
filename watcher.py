@@ -72,12 +72,14 @@ def watcher_handler(config):
         # files that are currently in each folder
         currentfiles = scan_folders(watch_folders, valid_extensions)
 
-        with open( "uploaded_files.json" , "r") as uploaded:
-            uploaded_dict = json.load(uploaded)
+        try:
+            with open( "uploaded_files.json" , "r") as uploaded:
+                uploaded_dict = json.load(uploaded)
 
-            for file_name in uploaded_dict["uploaded_files"]:
-                known_files.add(file_name)
-
+                for file_name in uploaded_dict["uploaded_files"]:
+                    known_files.add(file_name)
+        except Exception as e:
+            pass
         new_files = currentfiles - known_files      # finds the new files that appeared
 
         if( new_files):
