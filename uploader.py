@@ -44,18 +44,16 @@ def upload_file(file):
 def log_uploaded_files(file):
     
     try:
-        if os.path.exists(uploaded_json):
-            with open( uploaded_json , "r") as uploaded:
-                uploaded_dict = json.load(uploaded)
-
-                uploaded_dict["uploaded_files"].append(file)
-
-            with open(uploaded_json , "w") as uploaded:
-
-                json.dump(uploaded_dict , uploaded, indent=2)
+        with open( uploaded_json , "r") as uploaded:
+            uploaded_dict = json.load(uploaded)
 
     except (FileNotFoundError, json.JSONDecodeError):
-        print(f"{uploaded_json} file not found or it's broken")
+        uploaded_dict = {"uploaded_files" : [] }
+
+    uploaded_dict["uploaded_files"].append(file)
+
+    with open(uploaded_json , "w") as uploaded:
+        json.dump(uploaded_dict , uploaded, indent=2)
         return 
     
 
