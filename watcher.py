@@ -50,7 +50,7 @@ def add_to_queue(filename):
             queue_json_dict = {"queued_files": []}
 
         if "queued_files" not in queue_json_dict:
-            queue_json_dict["queued_files"] = []
+            queue_json_dict["queued_files"] = []    # adds queued_file key in the json file
 
         real_path = os.path.realpath(filename)
         if real_path not in queue_json_dict["queued_files"]: 

@@ -16,6 +16,7 @@ load_dotenv()
 token = os.getenv("BOT_TOKEN")
 chat_id = os.getenv("CHAT_ID")
 
+uploaded_json = "uploaded_files.json"
 
 def upload_file(file):
     # choose the endpoint
@@ -38,6 +39,27 @@ def upload_file(file):
             return response
     else:
         return None
+
+
+def     (file):
+    
+    try:
+        if os.path.exists(uploaded_json):
+            with open( uploaded_json , "r") as uploaded:
+                uploaded_dict = json.load(uploaded)
+
+                uploaded_dict["uploaded_files"].append(file)
+
+            with open(uploaded_json , "w") as uploaded:
+
+                json.dump(uploaded_dict , uploaded, indent=2)
+
+    except (FileNotFoundError, json.JSONDecodeError):
+        print(f"{uploaded_json} file not found or it's broken")
+        return 
+    
+    for file in uploaded_dict:
+
 
 
 # reades the queue.json - calls upload_file for every file that's queued and removes if that's uploaded successfully
@@ -66,6 +88,7 @@ def queue_handler():
             if response is None:
                 print(f"Skipping unsupported file format: {file}")
                 to_remove.append(file)
+                log_uploaded_files(file)
                 continue
 
             if response.status_code == 200:
@@ -87,7 +110,7 @@ def queue_handler():
                 current_queue_dict = {"queued_files": []}
 
             if "queued_files" not in current_queue_dict:
-                current_queue_dict["queued_files"] = []
+                current_queue_dict["queued_files"] = []     # adds empty queued_files field
 
             for file in to_remove:
                 if file in current_queue_dict["queued_files"]:
