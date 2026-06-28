@@ -2,7 +2,6 @@ import os
 import time
 import json
 import threading
-from uploader import uploaded_json
 # inotify = inotify_simple.INotify()
 
 
