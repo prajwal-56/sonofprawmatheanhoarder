@@ -1,5 +1,6 @@
 import subprocess
 import json
+import os
 
 """
 this script :
@@ -9,10 +10,16 @@ this script :
 def get_ssid():
     
     print(f"Trying to get the ssid..." , end="\r")
+
+    # ssid = subprocess.check_output(["iwgetid", "-r"]).decode("utf-8").strip()     # for linux 
+    # print(f"The ssid : {ssid}")
+    # return ssid
+
+
     # result of termux-wifi-connectioninfo
     connection_info = subprocess.run( ['termux-wifi-connectioninfo'], capture_output=True, text=True )
 
-    # check status of the command 
+    # # check status of the command 
     if connection_info.returncode == 0:
         # turns it into a python dict
         connection_info_dict = json.loads(connection_info.stdout)
@@ -23,6 +30,8 @@ def get_ssid():
         return ssid
     else:
         return None
+
+
 
 #  get the ssid - check if it's allowed or not
 def is_on_allowed_network( config):
