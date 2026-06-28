@@ -73,9 +73,16 @@ def queue_handler():
 
     to_remove = []
 
+    with open( "uploaded_files.json" , "r") as f:
+        already_uploaded = json.load(f).get("uploaded_files" , {})
+
     for file in queued_files:
         if not os.path.exists(file):
-            print(f"File doesn't exist no more. Removing from queue... : {file}")
+            to_remove.append(file)
+            continue
+
+        if file in already_uploaded:
+            print(f"Already uploaded. Skipping... {file}")
             to_remove.append(file)
             continue
 
@@ -109,9 +116,8 @@ def queue_handler():
             if "queued_files" not in current_queue_dict:
                 current_queue_dict["queued_files"] = []     # adds empty queued_files field
 
-            for file in to_remove:
-                if file in current_queue_dict["queued_files"]:
-                    current_queue_dict["queued_files"].remove(file)
+            current_queue_dict["queued_files"] = [f for f in current_queue_dict["queued_files"] if f not in to_remove]
+
 
             print(f"Writing queue : {current_queue_dict['queued_files']}")
             with open("queue.json", "w") as queue_json:

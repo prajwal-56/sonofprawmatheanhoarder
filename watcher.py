@@ -33,7 +33,7 @@ def scan_folders(watch_folders: list, valid_extensions: list = None):
                     ext = os.path.splitext(filename)[1].lower()
                     if ext not in valid_extensions:
                         continue
-                found.add(filepath)
+                found.add( os.path.realpath(filepath) )
         except Exception as e:
             print(f"Error scanning folder {folder}: {e}")
 
