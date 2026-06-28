@@ -58,8 +58,6 @@ def log_uploaded_files(file):
         print(f"{uploaded_json} file not found or it's broken")
         return 
     
-    for file in uploaded_dict:
-
 
 
 # reades the queue.json - calls upload_file for every file that's queued and removes if that's uploaded successfully
